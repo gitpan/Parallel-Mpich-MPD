@@ -1,0 +1,28 @@
+---
+name: Parallel-Mpich-MPD
+version: 0.1.0
+author:
+  - 'Olivier Evalet, Alexandre Masselot <alexandre.masselot@genebio.com>'
+abstract: Mpich MPD wrapper
+license: lgpl
+build_requires:
+  CGI: 0
+  Carp: 0
+  Cwd: 0
+  Data::Dumper: 0
+  File::Basename: 0
+  File::Spec: 0
+  File::Temp: 0
+  IO::All: 0
+  Object::InsideOut: 0
+  Test::More: 0
+  Time::HiRes: 0
+provides:
+  Parallel::Mpich::MPD:
+    file: lib/Parallel/Mpich/MPD.pm
+    version: 0.1.0
+  Parallel::Mpich::MPD::Common:
+    file: lib/Parallel/Mpich/MPD/Common.pm
+  Parallel::Mpich::MPD::Job:
+    file: lib/Parallel/Mpich/MPD/Job.pm
+generated_by: Module::Build version 0.26
