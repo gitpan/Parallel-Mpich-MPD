@@ -1,6 +1,6 @@
 ---
 name: Parallel-Mpich-MPD
-version: 0.1.0
+version: 0.2.0
 author:
   - 'Olivier Evalet, Alexandre Masselot <alexandre.masselot@genebio.com>'
 abstract: Mpich MPD wrapper
@@ -13,14 +13,18 @@ build_requires:
   File::Basename: 0
   File::Spec: 0
   File::Temp: 0
+  Getopt::Long: 0
   IO::All: 0
+  Mail::Sendmail: 0
   Object::InsideOut: 0
+  Proc::ProcessTable: 0
+  Sys::Hostname: 0
   Test::More: 0
   Time::HiRes: 0
 provides:
   Parallel::Mpich::MPD:
     file: lib/Parallel/Mpich/MPD.pm
-    version: 0.1.0
+    version: 0.2.0
   Parallel::Mpich::MPD::Common:
     file: lib/Parallel/Mpich/MPD/Common.pm
   Parallel::Mpich::MPD::Job:

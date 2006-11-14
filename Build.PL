@@ -19,6 +19,10 @@ close fd;
 #  }
 #EOF
 
+
+# get deps 
+# find . \( -name "*.pm" -or -name "*.pl" \) -exec grep -E "use +\S+;" {} \;|sort -u
+
 my $builder = Module::Build->new(
 				 module_name         => 'Parallel::Mpich::MPD',
 				 license             => 'lgpl',
@@ -38,6 +42,10 @@ my $builder = Module::Build->new(
 						    'Object::InsideOut'=>0,
 						    'Test::More' => 0,
 						    'Time::HiRes'=>0,
+						    'Mail::Sendmail' =>0,
+						    'Sys::Hostname'=>0,
+						    'Getopt::Long'=>0,
+						    'Proc::ProcessTable'=>0
 
 						   },
 				 script_files=>\@scripts,

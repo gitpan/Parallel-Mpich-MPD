@@ -30,17 +30,20 @@ mpich prefix (where it was installed). [default is empty, so mpich command shall
 =head2 Environment
 
 =head2 env_MpichHome([$val])
+
 Get or set (if $val is defined) the Mpich home
 
 =head2 env_Check
+
 Check if mpd environment is correct
 
-=head2 env_RPC
-Specifies the name of the command used to cntrol remote mpds: "ssh|rsh|xmlrpc" 
-Use empty value for default
+=head2 env_Print
 
-=head2 env_User([$user])
-Specify the default user
+print current environment
+
+=head2 nbHostInMachinefile(machinesfile => $file)
+
+return the nb hosts available on machinesfiles
 
 =head2 commandPath($cmd)
 
@@ -49,18 +52,17 @@ prepend $MPICH_HOME/bin if $MPICH_HOME is defined and return the global command 
 =head2 checkHosts(machinesfile => $machinesfile , hostsdown => \%hostsdown , hostsup =>\%hostsup)
 
  check hosts from machinesfile.
-  
- - validate that hosts are up with a ping
- 
- - validate that ssh publickey is well configured
+ - check hosts with a ping
+ - check that ssh publickey is well configured
  
  
-=head2 cleanTemp()
+=head2 cleanTemp
 
   remove tmp files
   
-=head2 __exec($cmd,\$stdout,\$stderr, [\$pid], [$spawn=1])
-extended exec 
+=head2 __exec(cmd => $cmd, params => $params, [stdout=>\$stdout], [stderr=>\$stderr], [pid=>\$pid], [spawn=>$spawn=1])
+
+extended exec that return the exit value and catch stds and pid.   
 
 =head1 BUGS
 

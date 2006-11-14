@@ -19,7 +19,7 @@ Parallel::Mpich::MPD - Mpich MPD wrapper
 
 =cut
 
-our $VERSION = '0.1.0';
+our $VERSION = '0.2.0';
 
 =head1 SYNOPSIS
     use Parallel::Mpich::MPD;
@@ -56,66 +56,58 @@ This I<Parallel::Mpich::MPD>, a wrapper module for MPICH2 Process Management too
 The wrapper include the following tools: basic configuration, mpdcheck, mpdboot, mpdcleanup, mpdtrace, 
 mpdringtest, mpdallexit, mpiexec, mpdsigjob and mpdlistjobs.
 
-=head1 EXPORT
+=over 4
 
-=head2 boot(hosts => @hosts, machinesfile => $machines, checkOnly => 1|0, output => \$output)
-
+=item boot(hosts => @hosts, machinesfile => $machines, checkOnly => 1|0, output => \$output)
   
-  starts a set of mpd's on a list of machines. boot try to verify that the hosts in the host file are up before attempting start mpds on any of them. 
+starts a set of mpd's on a list of machines. boot try to verify that the hosts in the host 
+file are up before attempting start mpds on any of them. 
   
+=item rebootHost(host => $hostname)
 
-=head2 rebootHost(host => $hostname)
+restart mpd on the specified host. rebootHost will kill old mpds before restarting a new one. 
+The killed MPDS are filtered by specific port and host.
 
-  restart mpd on the specified host. rebootHost will kill old mpds before restarting a new one. The killed MPDS are filtered by specific port and host.
+=item check(machinesfile => $file, hostsup => \%hosts, hostsdown => \%hostsdown , reboot => 1)
 
-=head2 check(machinesfile => $file, hostsup => \%hosts, hostsdown => \%hostsdown , reboot => 1)
-
-  Check if MPD master and nodes are well up. If MPD master is down it try to ping and ssh machines. 
+Check if MPD master and nodes are well up. If MPD master is down it try to ping and ssh machines.   
+If you use the option reboot, check will try to restart  mpd on specified machines or to reboot the master. 
   
-  If you use the option reboot, check will try to restart  mpd on specified machines or to reboot the master. 
+=item info( )
+
+return an %info of the master with the following keys (master, hostname, port)
   
-  
-=head2 info( )
+=item validateMachinesfile(machinefiles => $filename)
 
-  return an %info of the master with the following keys (master, hostname, port)
-  
+check with mpdtrace if all machines specified by filename are up. If not, a temporary file is 
+created with the resized machinesfile 
 
-=head2 validateMachinesfile(machinefiles => $filename)
+=item shutdown( )
 
-  check with mpdtrace if all machines specified by filename are up. If not, a temporary file is created with the resized machinesfile 
+causes all mpds in the ring to exit
 
-=head2 shutdown( )
-
-  causes all mpds in the ring to exit
-
-=head2 createJob({cmd => $cmd , machinesfile=> $filename, [params => $params], [ncpu => $ncpu], [alias => $alias])
-
-=head3
-  
-  start a new job with the command line and his params. It return true if ok.
-  
+=item createJob({cmd => $cmd , machinesfile=> $filename, [params => $params], [ncpu => $ncpu], [alias => $alias])
+ 
+start a new job with the command line and his params. It return true if ok.
   WARNING ncpu could be redefined if mpdtrace return à small hosts list
      
 Example:
   
   Parallel::Mpich::MPD::createJob(cmd => $cmd, params => $parms, ncpu => '3', alias => 'job1');
 
-=head2 listJobs([mpdlistjobs_contents=>$str])
+=item listJobs([mpdlistjobs_contents=>$str])
 
 Return an Parallel::Mpich::MPD::Job array for all available jobs
+If mpdlistjobs_contents argument is present, the code will not call mpdlistjobs but 
+take the parameter as a fake results of this command
 
-If mpdlistjobs_contents argument is present, the code will not call mpdlistjobs but take the parameter as a fake results of this command
-
-=head2 findJob([%criteria][, return=>(getone|host2pidlist))
+=item findJob([%criteria][, return=>(getone|host2pidlist))
 
 find a job from crtiteria. It return a Job instance or undef for no match
 
-params
-
-=head3 Criteria can be of
-
 =over 4
 
+=item Criteria can be of
 
 =item username=>'somename' or username=>\@arrayOfNames
 
@@ -157,20 +149,20 @@ my $job=Parallel::Mpich::MPD::findJob(jobid => '1@linux02_32996', return=>'geton
 
 =end verbatim
 
-=head2 trace([hosts => %hosts], long => 1)
+=item trace([hosts => %hosts], long => 1)
 
   Lists the  hostname of each of the mpds in the ring
   return true if ok
   
   [long=1] shows full hostnames and listening ports and ifhn
 
-=head2 makealias( )
+=item makealias( )
 
   "handle-" + PID + RAND(100) + Instance COUNTER++
   
   return a uniq string  alias
   
-=head2 clean([hosts => %hosts]  [killcmd=>"cmd"])
+=item clean([hosts => %hosts]  [killcmd=>"cmd"])
 
 Removes the Unix socket on local (the default) and remote machines
 This is useful in case the mpd crashed badly and did not remove it, which it normally does

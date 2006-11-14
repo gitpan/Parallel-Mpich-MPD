@@ -18,77 +18,71 @@ Parallel::Mpich::MPD::Job - Mpich MPD job wrapper
 
 =head1 METHOD
 
-=head2 infos()
+=head2 infos
 
 Get information of this job. Information contains these values:
+  my %info=$job->infos();
+  $info{jobid}; 
+  $info{jobalias};
+  $info{username};
+  $info{hosts}[0..N]{host};
+  $info{hosts}[0..N]{pid};
+  $info{hosts}[0..N]{sid};
+  $info{hosts}[0..N]{rank};
+  $info{hosts}[0..N]{cmd};
 
-my %info=$job->infos();
-$info{jobid}; 
-$info{jobalias};
-$info{username};
-$info{hosts}[0..N]{host};
-$info{hosts}[0..N]{pid};
-$info{hosts}[0..N]{sid};
-$info{hosts}[0..N]{rank};
-$info{hosts}[0..N]{cmd};
-
-=head2 kill()
+=head2 kill
 
 Kill this job. See examples:
+  Parallel::Mpich::MPD::findJob(alias => 'olivier1')->kill();
+  Parallel::Mpich::MPD::findJob(jobid => '1@linux02_32996')->kill();
 
-Parallel::Mpich::MPD::findJob(alias => 'olivier1')->kill();
-Parallel::Mpich::MPD::findJob(jobid => '1@linux02_32996')->kill();
-
-
-=head2 signal()
+=head2 signal
 
 Send a sig to this job. 
-
 It return false if not ok.
-
 examples:
+  # SIGQUIT, SIGKILL, SIGSTOP, SIGCONT, SIGXCPU, SIGUSR1, SIGUSR2  
+  Parallel::Mpich::MPD::findJob(alias => 'olivier1')->signal("SIGSTOP");
+  Parallel::Mpich::MPD::findJob(alias => 'olivier1')->signal("SIGCONT");
+  Parallel::Mpich::MPD::findJob(jobid => '1@linux02_32996')->kill();
 
-# SIGQUIT, SIGKILL, SIGSTOP, SIGCONT, SIGXCPU, SIGUSR1, SIGUSR2
+=over 4
 
-Parallel::Mpich::MPD::findJob(alias => 'olivier1')->signal("SIGSTOP");
-Parallel::Mpich::MPD::findJob(alias => 'olivier1')->signal("SIGCONT");
-Parallel::Mpich::MPD::findJob(jobid => '1@linux02_32996')->kill();
+  NOTE:
+  You couLd check the state with the following ps command:
+  ps -eo state,nice,user,comm
+  ps state des:
+  D    Uninterruptible sleep (usually IO)
+  R    Running or runnable (on run queue)
+  S    Interruptible sleep (waiting for an event to complete)
+  T    Stopped, either by a job control signal or because it is being traced.
+  W    paging (not valid since the 2.6.xx kernel)
+  X    dead (should never be seen)
+  Z    Defunct ("zombie") process, terminated but not reaped by its parent.
 
-=head2 sig_stop()
+=back
+
+=head2 sig_stop
 
 Stop this job.
-
 return false if not ok
 
-  # NOTE:
-  # You cloud check the state with the following ps command:
-  # ps -eo state,nice,user,comm
-  # ps state des:
-  #D    Uninterruptible sleep (usually IO)
-  #R    Running or runnable (on run queue)
-  #S    Interruptible sleep (waiting for an event to complete)
-  #T    Stopped, either by a job control signal or because it is being traced.
-  #W    paging (not valid since the 2.6.xx kernel)
-  #X    dead (should never be seen)
-  #Z    Defunct ("zombie") process, terminated but not reaped by its parent.
-
-=head2 sig_cont()
+=head2 sig_cont
 
 Continue this job.
-
 return false if not ok
 
-=head2 kill()
+=head2 kill
 
 Send a kill signal
 
 =head2 equals($job)
 
 compare towo jobs and return true/false
+FIXME.: should be implemented 
 
-TODO: this function is not finished . 
-
-=head2 toSummaryString()
+=head2 toSummaryString
 
 return a string for the current job
 

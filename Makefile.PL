@@ -9,14 +9,18 @@ WriteMakefile
           'VERSION_FROM' => 'lib/Parallel/Mpich/MPD.pm',
           'PREREQ_PM' => {
                            'IO::All' => 0,
+                           'Getopt::Long' => 0,
                            'File::Spec' => 0,
                            'Data::Dumper' => 0,
                            'Time::HiRes' => 0,
                            'CGI' => 0,
                            'Carp' => 0,
                            'Test::More' => 0,
+                           'Mail::Sendmail' => 0,
                            'File::Temp' => 0,
+                           'Proc::ProcessTable' => 0,
                            'File::Basename' => 0,
+                           'Sys::Hostname' => 0,
                            'Object::InsideOut' => 0,
                            'Cwd' => 0
                          }
