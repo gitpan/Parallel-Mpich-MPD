@@ -19,7 +19,7 @@ Parallel::Mpich::MPD - Mpich MPD wrapper
 
 =cut
 
-our $VERSION = '0.2.0';
+our $VERSION = '0.2.2';
 
 =head1 SYNOPSIS
     use Parallel::Mpich::MPD;
@@ -320,7 +320,6 @@ sub rebootHost{
   my $kill="ps -U $env{info}{user} -o pid,command|grep -e \"$mpdinfo{hostname} -p $mpdinfo{port}\" |grep -v grep |cut -d \" \" -f2";
   my $cmd="ssh $params{'host'} '$kill|xargs kill 2>/dev/null'";
   my $ret=system $cmd;
-  print $cmd."\nreturn $ret\n ";
   
   $cmd="ssh $params{'host'} ". commandPath('mpd')." -h $mpdinfo{hostname} -p $mpdinfo{port} --ncpus=1 -e -d";
   
@@ -368,15 +367,16 @@ sub check{
   #1) check mpdtrace hosts
   my $res=trace(hosts => \%hosts);
   
+  my $machines=IO::All::io($machinesfile)->slurp;
+  my %hostsdown;
   if ($res){
     #compare hosts result with the input machinesfile 
-    my $machines=IO::All::io($machinesfile)->slurp;
     my %hostsup;
-    my %hostsdown;
     
     foreach (split /[\n\r]/, $machines){
       next unless /\S/;
       next if /#.*$/;
+      s/([^.]+).*$/$1/;
       if (defined($hosts{$_}) && $hosts{$_}==1){
 	$hostsup{$_}=1;
       }else{
@@ -399,6 +399,14 @@ sub check{
     
 
   }else{
+    foreach (split /[\n\r]/, $machines){
+      next unless /\S/;
+      next if /#.*$/;
+      s/([^.]+).*$/$1/;
+      $hostsdown{$_}=1;
+    }
+    %{$params{hostsdown}}=%hostsdown if defined $params{hostsdown};
+    
     print "ERROR:MPD::check():  MPD seems down, it's a really bad news!\n" if ($Parallel::Mpich::MPD::Common::WARN == 1);
     if (defined $params{reboot} && $params{reboot}==1){
       print "INFO: trying to restart MPD.\n";
@@ -413,14 +421,14 @@ sub check{
     #
     # FATAL ERROR: the cluster is dead
     #
-    die "ERROR: your cluster is dead! All Hosts defined in $machinesfile are down.";
+    print "ERROR: your cluster is dead! All Hosts defined in $machinesfile are down.";
   }
 
   
   #3) should clean and restart mpd ?
 
 
-  return %hosts;
+  return %hosts=();
 }
 
 
@@ -429,7 +437,8 @@ sub shutdown{
   my $stdout="";
   my $stderr="";
   env_Init();
-  my $ret2=Parallel::Mpich::MPD::Common::__exec(cmd => commandPath('mpdcleanup'));
+  my $cmd=commandPath('mpdcleanup')." -f ".Parallel::Mpich::MPD::Common::env_Hostsfile();
+  my $ret2=Parallel::Mpich::MPD::Common::__exec(cmd => $cmd, stderr=> \$stderr);
   my $ret1=Parallel::Mpich::MPD::Common::__exec(cmd => commandPath('mpdallexit'));
   return $ret1==0 && $ret2==0;
 }
@@ -499,6 +508,8 @@ sub validateMachinesfile{
       foreach (split /[\n\r]/, $machines){
 	next unless /\S/;
 	next if /#.*$/;
+        s/([^.]+).*$/$1/;
+	
 	if (defined($hosts{$_}) && $hosts{$_}==1 ){
           print  $fhosts $_."\n";
 	}else{

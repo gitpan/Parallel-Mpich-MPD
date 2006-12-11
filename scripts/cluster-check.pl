@@ -71,9 +71,11 @@ my %info=Parallel::Mpich::MPD::info();
 my $mpd_is_down;
 my $machine_is_down;
 my $mpdnode_is_down;
+my $sendemail;
 if ((my $c=%info)  eq "0"){
   print STDERR "ERROR:MPD seems down, could not read master informations\n";
   $mpd_is_down=1;
+  $sendemail=1;
 }
 my %hostsdown; 
 print "2) Checking machines for ping and ssh...\n";
@@ -82,14 +84,17 @@ Parallel::Mpich::MPD::Common::checkHosts(hostsdown => \%hostsdown );
 if (($c = %hostsdown) ne "0" ){
   print STDERR "ERROR: machine(s) doesn't respond, please check why?\n";
   $machine_is_down=1;
-  #
-  #TODO resize the cluster here
+  $sendemail=1;
 }
 $repair=(defined($repair))?" (and try to repair) ":"";
 print "3) Checking $repair MDP nodes state ...\n\n";
 my %hostsdown;
 my %hostsup=Parallel::Mpich::MPD::check(reboot =>(defined $repair)?1:0, hostsdown=>\%hostsdown);
 
+if (($c = %hostsdown) eq "0" ){
+  undef $machine_is_down;
+  undef $mpd_is_down;
+}
 
 print "\n";
 print "REPORT:\n";
@@ -104,7 +109,7 @@ unless (($c=%hostsdown) eq "0" ){
   foreach (keys %hostsdown){print "\t$_ is not available\n";};
 }
 
-if (defined $mailto && ((($c=%hostsdown) ne "0" ) ||defined($mpd_is_down)||defined($machine_is_down))){
+if (defined ($mailto) && defined($sendemail)){
   my $mail=IO::All::io($mailfile->filename)->slurp;
   %send=(To => $mailto, From => $mailto, Subject => "MPD check report", Message => $mail);
   sendmail(%send) or die $Mail::Sendmail::error;
