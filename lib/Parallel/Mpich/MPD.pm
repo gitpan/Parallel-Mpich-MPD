@@ -19,7 +19,7 @@ Parallel::Mpich::MPD - Mpich MPD wrapper
 
 =cut
 
-our $VERSION = '0.2.2';
+our $VERSION = '0.3.0';
 
 =head1 SYNOPSIS
     use Parallel::Mpich::MPD;
@@ -421,7 +421,7 @@ sub check{
     #
     # FATAL ERROR: the cluster is dead
     #
-    print "ERROR: your cluster is dead! All Hosts defined in $machinesfile are down.";
+    die "ERROR: your cluster is dead! All Hosts defined in $machinesfile are down.";
   }
 
   
@@ -433,15 +433,7 @@ sub check{
 
 
 
-sub shutdown{
-  my $stdout="";
-  my $stderr="";
-  env_Init();
-  my $cmd=commandPath('mpdcleanup')." -f ".Parallel::Mpich::MPD::Common::env_Hostsfile();
-  my $ret2=Parallel::Mpich::MPD::Common::__exec(cmd => $cmd, stderr=> \$stderr);
-  my $ret1=Parallel::Mpich::MPD::Common::__exec(cmd => commandPath('mpdallexit'));
-  return $ret1==0 && $ret2==0;
-}
+
 
 
 #use a cached jobs to force the update on each getJobs call!!!
@@ -736,8 +728,16 @@ sub clean{
   $cmdparms.=" -k \"" .$params{killcmd} ."\"" if defined $params{killcmd};
 
   my $cmd=commandPath('mpdcleanup')."$cmdparms 2>/dev/null";
-  my $jobclean=`cmd`;
-  return $jobclean;
+  return system ($cmd);
+}
+
+sub shutdown{
+  my $stdout="";
+  my $stderr="";
+  env_Init();
+  my $ret2=Parallel::Mpich::MPD::Common::__exec(cmd => commandPath('mpdallexit'));
+  $ret2=clean() if $ret2;
+  return $ret2==0;
 }
 
 our $aliasCounter=0;
