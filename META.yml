@@ -1,6 +1,6 @@
 ---
 name: Parallel-Mpich-MPD
-version: 0.3.0
+version: 0.4.0
 author:
   - 'Olivier Evalet, Alexandre Masselot <alexandre.masselot@genebio.com>'
 abstract: Mpich MPD wrapper
@@ -24,7 +24,7 @@ build_requires:
 provides:
   Parallel::Mpich::MPD:
     file: lib/Parallel/Mpich/MPD.pm
-    version: 0.3.0
+    version: 0.4.0
   Parallel::Mpich::MPD::Common:
     file: lib/Parallel/Mpich/MPD/Common.pm
   Parallel::Mpich::MPD::Job:

@@ -19,7 +19,7 @@ Parallel::Mpich::MPD - Mpich MPD wrapper
 
 =cut
 
-our $VERSION = '0.3.0';
+our $VERSION = '0.4.0';
 
 =head1 SYNOPSIS
     use Parallel::Mpich::MPD;
@@ -519,6 +519,18 @@ sub validateMachinesfile{
   return $retfile;
 }
 
+sub isJobRegistered{
+  my ($alias)=@_;
+  # we don't know if job is register without alias
+  return 1 unless defined $alias;
+  if(system(commandPath('mpdlistjobs')." 2>/dev/null|grep -qe \"alias.*$alias\"")){
+    return 0;
+  }else{
+   print "INFO: job $alias is registered \n" if ($Parallel::Mpich::MPD::Common::WARN == 1);
+   return 1;
+  }
+}
+
 
 # TODO check that the machine file contains booted hosts
 # FIXME create job should wait until job is correctly registered by mpd.
@@ -573,7 +585,13 @@ sub createJob{
   
   my $ret=Parallel::Mpich::MPD::Common::__exec(%args);
   print STDERR "FIXME ".__LINE__.": Before returning createJob, we should wait until MPD has registered the new mpiexec job. \n" if ($Parallel::Mpich::MPD::Common::WARN ==1);
-  usleep (500*1000);
+  my $TIMEOUT=0;
+  do{
+    usleep (400*1000);
+    $TIMEOUT+=400;
+    # wait registration until timeout of 10 secondes
+  }while(!isJobRegistered($params{alias}) && $TIMEOUT<10000);
+  
   return $ret==0;
 }
 

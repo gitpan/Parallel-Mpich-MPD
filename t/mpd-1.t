@@ -7,17 +7,16 @@ use_ok('Parallel::Mpich::MPD');
 
 my ($cmd, $parms)=0?("burncpu.pl", "--time=20 --cpu=1"):("sleep", "20");
 
-
 ### THIS TEST COULD BE AUTOMATIZED
-exit;
 #$Parallel::Mpich::MPD::Common::DEBUG=1;
-#$Parallel::Mpich::MPD::Common::WARN=1;
+$Parallel::Mpich::MPD::Common::WARN=1;
 my $jobs;
 my $job;
 
 #ok(defined(Parallel::Mpich::MPD::Common::env_User("evaleto")),"start mpd for user evaleto");
 ok(Parallel::Mpich::MPD::Common::env_Check(), "check environment");
 ok(Parallel::Mpich::MPD::Common::env_Print(), "print environment");
+exit 0 unless -r $ENV[MPICH_HOSTS];
 
 
 
@@ -27,9 +26,9 @@ print "# mpd test\n";
 ok(Parallel::Mpich::MPD::boot(), "boot mpd if not already up");
 #ok(print Parallel::Mpich::MPD::check(), "check mpd if not already up");
 my $alias1=Parallel::Mpich::MPD::makealias();
-ok(Parallel::Mpich::MPD::createJob(cmd => $cmd, params => $parms, ncpu => '2', alias => $alias1), "create a new job $alias1");
+ok(Parallel::Mpich::MPD::createJob(cmd => $cmd, params => $parms, ncpu => '2', alias => $alias1, spawn=>1), "create a new spawned job $alias1");
 my $alias2=Parallel::Mpich::MPD::makealias();
-ok(Parallel::Mpich::MPD::createJob(cmd => $cmd, params => $parms, ncpu => '2', alias => $alias2), "create a new job $alias2");
+ok(Parallel::Mpich::MPD::createJob(cmd => $cmd, params => $parms, ncpu => '2', alias => $alias2, spawn=>1), "create a new a new spawned job $alias2");
 ok(defined(Parallel::Mpich::MPD::listJobs()), "get all jobs information");
 
 print "#\n";
