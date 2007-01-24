@@ -16,7 +16,7 @@ my $job;
 #ok(defined(Parallel::Mpich::MPD::Common::env_User("evaleto")),"start mpd for user evaleto");
 ok(Parallel::Mpich::MPD::Common::env_Check(), "check environment");
 ok(Parallel::Mpich::MPD::Common::env_Print(), "print environment");
-exit 0 unless -r $ENV[MPICH_HOSTS];
+exit 0 unless -r $ENV[HOME]."/mpd.hosts";
 
 
 
@@ -27,6 +27,7 @@ ok(Parallel::Mpich::MPD::boot(), "boot mpd if not already up");
 #ok(print Parallel::Mpich::MPD::check(), "check mpd if not already up");
 my $alias1=Parallel::Mpich::MPD::makealias();
 ok(Parallel::Mpich::MPD::createJob(cmd => $cmd, params => $parms, ncpu => '2', alias => $alias1, spawn=>1), "create a new spawned job $alias1");
+Parallel::Mpich::MPD::waitJobRegistration($alias1);
 my $alias2=Parallel::Mpich::MPD::makealias();
 ok(Parallel::Mpich::MPD::createJob(cmd => $cmd, params => $parms, ncpu => '2', alias => $alias2, spawn=>1), "create a new a new spawned job $alias2");
 ok(defined(Parallel::Mpich::MPD::listJobs()), "get all jobs information");

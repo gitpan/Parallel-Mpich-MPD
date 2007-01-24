@@ -19,7 +19,7 @@ Parallel::Mpich::MPD - Mpich MPD wrapper
 
 =cut
 
-our $VERSION = '0.4.0';
+our $VERSION = '0.5.0';
 
 =head1 SYNOPSIS
     use Parallel::Mpich::MPD;
@@ -519,6 +519,7 @@ sub validateMachinesfile{
   return $retfile;
 }
 
+
 sub isJobRegistered{
   my ($alias)=@_;
   # we don't know if job is register without alias
@@ -526,10 +527,21 @@ sub isJobRegistered{
   if(system(commandPath('mpdlistjobs')." 2>/dev/null|grep -qe \"alias.*$alias\"")){
     return 0;
   }else{
-   print "INFO: job $alias is registered \n" if ($Parallel::Mpich::MPD::Common::WARN == 1);
+   print STDERR "INFO: job $alias is registered \n" if ($Parallel::Mpich::MPD::Common::WARN == 1);
    return 1;
   }
 }
+
+sub waitJobRegistration{
+  my ($alias)=@_;
+  my $TIMEOUT=0;
+  do{
+    usleep (400*1000);
+    $TIMEOUT+=400;
+  }while(!isJobRegistered($alias) && $TIMEOUT<10000);
+  return 1;
+}
+
 
 
 # TODO check that the machine file contains booted hosts
@@ -571,11 +583,7 @@ sub createJob{
   my $cmd=commandPath('mpiexec')." $mpiexecArgs $params{cmd} $params{params}";
   print STDERR "hostfile=".$machinesfile."\n";
 
-#  $cmd="/opt/mpich-2.1/bin/mpiexec  -a handle-1876-0 -machinesfile /home/alex/phenyx/olavdev-cluster.mach -n 3 sleep 5";
 
-#  foreach (sort keys %ENV){
-#    print STDERR "export $_=$ENV{$_}\n";
-#  }
   my %args=(cmd => $cmd);
   $args{params}=\$params{params} if (defined($params{params}) );
   $args{spawn}=\$params{spawn} if (defined($params{spawn}) );
@@ -584,13 +592,8 @@ sub createJob{
   $args{pid}=$params{pid} if (defined($params{pid}) );
   
   my $ret=Parallel::Mpich::MPD::Common::__exec(%args);
-  print STDERR "FIXME ".__LINE__.": Before returning createJob, we should wait until MPD has registered the new mpiexec job. \n" if ($Parallel::Mpich::MPD::Common::WARN ==1);
-  my $TIMEOUT=0;
-  do{
-    usleep (400*1000);
-    $TIMEOUT+=400;
-    # wait registration until timeout of 10 secondes
-  }while(!isJobRegistered($params{alias}) && $TIMEOUT<10000);
+  waitJobRegistration($params{alias}) if defined($params{spawn}) && defined($params{alias});
+  
   
   return $ret==0;
 }
