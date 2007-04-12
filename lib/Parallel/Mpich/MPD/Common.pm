@@ -117,11 +117,12 @@ our $MPICH_HOME=(defined $ENV{MPICH_HOME})?$ENV{MPICH_HOME}:"";
 our $TMP_MPD_PREFIX="mpd-$ENV{USER}";
 our $DEBUG=0;
 our $WARN=0;
+our $TEST=0;
 our $ERROR_MSG;
 our (@ISA, @EXPORT, @EXPORT_OK);
 our @MPDBINS= qw(mpdlistjobs mpdcheck mpdboot mpdcleanup mpdtrace mpdringtest mpdallexit mpiexec);
 @ISA        = qw(Exporter);
-@EXPORT     = qw(%env env_MpichHome env_Init env_Check env_RPC env_User commandPath checkHosts $ERROR_MSG $TMP_MPD_PREFIX);
+@EXPORT     = qw(%env env_MpichHome env_Init env_Check env_RPC env_User commandPath checkHosts stripMachinefile $ERROR_MSG $TMP_MPD_PREFIX);
 
 
 @EXPORT_OK  = ();
@@ -155,7 +156,7 @@ sub env_Init{
   unless (defined $prms{root}){
     my $id=`id -u`;
     chop $id;
-    die "ERROR: You must NOT run MPD as super user (root:$id)." unless $id;
+    die "ERROR: You must NOT run MPD as super user (root:$id)." unless ($id|$TEST);
   }
   return if $_isEnvInited;
   
@@ -240,6 +241,27 @@ sub nbHostInMachinefile{
   return $count;
 }
 
+sub stripMachinefile{
+  my $file=shift or die "must provide a file to ".__PACKAGE__.":stripMachinefile()";
+  my $hosts = IO::All::io($file)->slurp;
+  $hosts=~s/#.*$//gm;
+  my @tmp=split(/\s*\n\s*/, $hosts);
+  my %host;
+  foreach my $h (@tmp){
+    $host{$h}=1;
+  }
+  @tmp= keys %host;
+  my $count=@tmp;
+  
+  my $fh = new File::Temp(UNLINK=>0, TEMPLATE => File::Spec->tmpdir."/$TMP_MPD_PREFIX-hosts-XXXX");
+  foreach (@tmp){
+    print $fh $_."\n";
+  }
+  
+  print "DEBUG:stripMachinefile(1) input=$file return=$count, output=".$fh->filename."\n" if $DEBUG==1;
+  return ($count,$fh->filename);
+}
+
 sub env_Print{
   env_Init();
   printf "%-20s : %s\n", "user", "$env{info}{user}";
@@ -267,7 +289,7 @@ sub __param_buildHost{
     my $fh = new File::Temp(UNLINK=>!$ENV{DO_NOT_REMOVE_TEMPFILE}, TEMPLATE => File::Spec->tmpdir."/$TMP_MPD_PREFIX-hosts-XXXX");
 #    $hosts=~s/\s+/\n/g;
     foreach (@hosts){
-      print $fh $_;
+      print $fh $_."\n";
     }
     return $fh->filename;
   }

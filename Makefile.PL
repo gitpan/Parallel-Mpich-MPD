@@ -5,7 +5,11 @@ WriteMakefile
           'PL_FILES' => {},
           'INSTALLDIRS' => 'site',
           'NAME' => 'Parallel::Mpich::MPD',
-          'EXE_FILES' => [],
+          'EXE_FILES' => [
+                           'scripts/mpd-check.pl',
+                           'scripts/mpd-kill.pl',
+                           'scripts/mpiruns.pl'
+                         ],
           'VERSION_FROM' => 'lib/Parallel/Mpich/MPD.pm',
           'PREREQ_PM' => {
                            'IO::All' => 0,

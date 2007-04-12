@@ -1,15 +1,23 @@
 #!/usr/bin/env  perl
 use Data::Dumper;
 
-use Test::More tests => 9;
+use Test::More tests => 12;
+use File::Basename;
 
 use_ok('Parallel::Mpich::MPD' );
+use_ok('Parallel::Mpich::MPD::Common' );
 
 
 #$Parallel::Mpich::MPD::Common::DEBUG=1;
 #$Parallel::Mpich::MPD::Common::WARN=1;
+$Parallel::Mpich::MPD::Common::TEST=1;
 
 
+my ($nbcpu,$file)=Parallel::Mpich::MPD::Common::stripMachinefile(dirname($0)."/hostfile_bad.txt");
+ok($nbcpu==2, "NBCPU == 2 ($nbcpu)");
+ok($file, "new file created at $file");
+system "cat $file";
+print "EOF\n\n";
 sub testExec{
   my $cmd=shift;
   my $out="";

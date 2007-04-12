@@ -7,6 +7,7 @@ Makefile.PL
 lib/Parallel/Mpich/MPD.pm
 lib/Parallel/Mpich/MPD/Common.pm
 lib/Parallel/Mpich/MPD/Job.pm
+t/localhost
 t/00-load.t
 t/pod-coverage.t
 t/pod.t
@@ -18,4 +19,4 @@ t/mpdlistjobs-1.txt
 t/mpd-check.t
 scripts/mpd-kill.pl
 scripts/mpiruns.pl
-scripts/cluster-check.pl
+scripts/mpd-check.pl

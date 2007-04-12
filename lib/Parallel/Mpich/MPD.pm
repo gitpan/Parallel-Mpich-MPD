@@ -19,7 +19,7 @@ Parallel::Mpich::MPD - Mpich MPD wrapper
 
 =cut
 
-our $VERSION = '0.5.0';
+our $VERSION = '0.7.0';
 
 =head1 SYNOPSIS
     use Parallel::Mpich::MPD;
@@ -245,8 +245,8 @@ sub boot{
   env_Init();
   my $cmdparms="";  #only one instance of mpd should run
   my $usermachinesfile;
-  $usermachinesfile.="-f " if defined $params{machinesfile};
-  $usermachinesfile.="-f ".Parallel::Mpich::MPD::Common::__param_buildHost(@{$params{hosts}}) if defined $params{hosts};
+  $usermachinesfile.="$params{machinesfile}" if defined $params{machinesfile};
+  $usermachinesfile.=Parallel::Mpich::MPD::Common::__param_buildHost(@{$params{hosts}}) if defined $params{hosts};
   
 #   if (defined $env{info}{user}){
 #     $cmdparms.=" -u $env{info}{user}";
@@ -256,13 +256,16 @@ sub boot{
     $cmdparms.=" -r $env{conf}{rpc}";
   }
   if (defined $usermachinesfile){
-    $cmdparms.=" $usermachinesfile"; 
+    $cmdparms.=" -f $usermachinesfile"; 
+    $cmdparms.=" -n ".Parallel::Mpich::MPD::Common::nbHostInMachinefile($usermachinesfile);
   }elsif (defined $env{conf}{mpd}{hostsfile}){
-    $cmdparms.=" -f $env{conf}{mpd}{hostsfile} "; 
+    my ($ncpu,$stripfile)=Parallel::Mpich::MPD::Common::stripMachinefile($env{conf}{mpd}{hostsfile});
+    $cmdparms.=" -f $stripfile "; 
+    $cmdparms.=" -n $ncpu ";
   }
-  if (defined $env{conf}{mpiexec}{ncpu}){
-    $cmdparms.=" -n ".($env{conf}{mpiexec}{ncpu}+1); 
-  }
+#   if (defined $env{conf}{mpiexec}{ncpu}){
+#     $cmdparms.=" -n ".($env{conf}{mpiexec}{ncpu}+1); 
+#   }
   if (defined($params{checkOnly})){
     $cmdparms.=" --chkuponly --verbose "; 
   }elsif (defined($params{verbose})){
@@ -317,8 +320,16 @@ sub rebootHost{
   }
   
   #TODO make this better ;)
-  my $kill="ps -U $env{info}{user} -o pid,command|grep -e \"$mpdinfo{hostname} -p $mpdinfo{port}\" |grep -v grep |cut -d \" \" -f2";
-  my $cmd="ssh $params{'host'} '$kill|xargs kill 2>/dev/null'";
+  # pkill -f mpd.py
+  my $kill;
+  my $cmd;
+  if (system("pkill --help &>/dev/null")){
+    $kill="pkill -U $env{info}{user} -f mpd.py";
+    $cmd="ssh $params{'host'} 'pkill -U $env{info}{user} -f mpd.py'";
+  }else{
+    $kill="ps -U $env{info}{user} -o pid,command|grep -e \"$mpdinfo{hostname} -p $mpdinfo{port}\" |grep -v grep |cut -d \" \" -f2";
+    $cmd="ssh $params{'host'} '$kill|xargs kill 2>/dev/null'";
+  }
   my $ret=system $cmd;
   
   $cmd="ssh $params{'host'} ". commandPath('mpd')." -h $mpdinfo{hostname} -p $mpdinfo{port} --ncpus=1 -e -d";
@@ -361,7 +372,9 @@ sub check{
   my %hosts=();
   my $should_resize;
   
-  my $machinesfile=(defined $params{machinesfile})?$params{machinesfile}:$env{conf}{mpd}{hostsfile};
+  my ($ncpu,$stripfile)=Parallel::Mpich::MPD::Common::stripMachinefile($env{conf}{mpd}{hostsfile}) unless defined $params{machinesfile};
+  
+  my $machinesfile=(defined $params{machinesfile})?$params{machinesfile}:$stripfile;
   #trace hosts
   
   #1) check mpdtrace hosts
@@ -409,6 +422,8 @@ sub check{
     
     print "ERROR:MPD::check():  MPD seems down, it's a really bad news!\n" if ($Parallel::Mpich::MPD::Common::WARN == 1);
     if (defined $params{reboot} && $params{reboot}==1){
+      print "INFO: Clean all MPD.\n";
+      clean(pkill=>1);
       print "INFO: trying to restart MPD.\n";
       boot();
       return check(machinesfile => $machinesfile, hostsup=>$params{hostsup}, hostsdown=>$params{hostsdown});
@@ -504,6 +519,7 @@ sub validateMachinesfile{
 	
 	if (defined($hosts{$_}) && $hosts{$_}==1 ){
           print  $fhosts $_."\n";
+          print  "validated machines : ".$_."\n" if ($Parallel::Mpich::MPD::Common::DEBUG == 1);
 	}else{
 	  $retfile=$fhosts->filename;
           print STDERR "WARNING: node $_ defined on machinesfile [".$params{machinesfile}."] is not available\n";
@@ -689,6 +705,8 @@ sub findJob{
     return undef unless %retjobs;
 
     my $sz=keys %retjobs;
+    print __PACKAGE__."::findjobs() ".Dumper \%retjobs if $Parallel::Mpich::MPD::Common::WARN;
+    
     if($sz==1){
       #OK
       return (values %retjobs)[0];
@@ -736,7 +754,7 @@ sub trace{
 # Removes the Unix socket on local (the default) and remote machines
 # This is useful in case the mpd crashed badly and did not remove it, which it normally does
 # params
-# [hosts => %hosts]  [killcmd=>"cmd"]
+# [hosts => %hosts]  pkill=>1
 sub clean{
   my %params=@_;
   env_Init();
@@ -744,11 +762,12 @@ sub clean{
   if (defined $params{hosts}){
     $cmdparms.=" -f ".Paralle l::Mpich::MPD::Common::__param_buildHost(@{$params{hosts}}) ;
   }else{
-    $cmdparms.=" -f ".Parallel::Mpich::MPD::Common::env_Hostsfile();
+    $cmdparms.=" -f ".Parallel::Mpich::MPD::Common::stripMachinefile($env{conf}{mpd}{hostsfile});
   }
-  $cmdparms.=" -k \"" .$params{killcmd} ."\"" if defined $params{killcmd};
+  $cmdparms.=" -k \"pkill -U $env{info}{user} -f mpd.py\"" if defined $params{pkill};
 
   my $cmd=commandPath('mpdcleanup')."$cmdparms 2>/dev/null";
+#  print STDERR $cmd."\n";
   return system ($cmd);
 }
 

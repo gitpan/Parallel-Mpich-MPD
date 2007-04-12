@@ -8,6 +8,7 @@ use_ok('Parallel::Mpich::MPD' );
 
 #$Parallel::Mpich::MPD::Common::DEBUG=1;
 #$Parallel::Mpich::MPD::Common::WARN=1;
+$Parallel::Mpich::MPD::Common::TEST=1;
 my $jobs;
 my $job;
 

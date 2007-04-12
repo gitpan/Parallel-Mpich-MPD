@@ -3,6 +3,11 @@ use strict;
 use Module::Build;
 
 my @scripts;
+open (fd, "<MANIFEST") or die "cannot open MANIFEST: $!";
+while(<fd>){
+  chomp;
+  push @scripts, $_ if /^(scripts)\//;
+}
 my %cgi_scripts;
 open (fd, "<MANIFEST") or die "cannot open MANIFEST: $!";
 while(<fd>){

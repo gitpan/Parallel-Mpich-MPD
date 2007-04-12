@@ -5,6 +5,7 @@ use Data::Dumper;
 use Test::More tests => 14;
 
 use_ok('Parallel::Mpich::MPD' );
+$Parallel::Mpich::MPD::Common::TEST=1;
 
 use File::Basename;
 my $contents=IO::All::io(dirname($0)."/mpdlistjobs-1.txt")->slurp;
