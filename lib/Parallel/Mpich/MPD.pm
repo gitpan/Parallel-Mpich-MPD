@@ -19,7 +19,7 @@ Parallel::Mpich::MPD - Mpich MPD wrapper
 
 =cut
 
-our $VERSION = '0.7.0';
+our $VERSION = '0.8.0';
 
 =head1 SYNOPSIS
     use Parallel::Mpich::MPD;

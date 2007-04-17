@@ -28,4 +28,4 @@ ok($info{hostname}=~/\S+/ , "checking mpd info :host $info{hostname}");
 
 
 ok(Parallel::Mpich::MPD::shutdown(), "shutdown mpd");
-ok(Parallel::Mpich::MPD::clean(pkill=>1), "clean jobs");
+#ok(Parallel::Mpich::MPD::clean(pkill=>1), "clean jobs");
