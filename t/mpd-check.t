@@ -2,6 +2,7 @@
 use Data::Dumper;
 
 use Test::More tests => 8;
+use Test::More tests => ($ENV{MPICH_MPD_TEST})?8:2;
 use File::Basename;
 
 use_ok('Parallel::Mpich::MPD');
@@ -12,6 +13,8 @@ $Parallel::Mpich::MPD::Common::TEST=1;
 
 
 ok(Parallel::Mpich::MPD::Common::env_Hostsfile(dirname(0)."/t/localhost"),"set hostfile :".dirname(0)."/localhost");
+
+exit 0 unless $ENV{MPICH_MPD_TEST};
 
 print STDERR "\n\n# ------------------->the «ssh localhost» will be called for each command...\n";
 print STDERR "# ------------------->ENTER PASSWORD \n\n";

@@ -8,6 +8,7 @@ lib/Parallel/Mpich/MPD.pm
 lib/Parallel/Mpich/MPD/Common.pm
 lib/Parallel/Mpich/MPD/Job.pm
 t/localhost
+t/hostfile_bad.txt
 t/00-load.t
 t/pod-coverage.t
 t/pod.t
