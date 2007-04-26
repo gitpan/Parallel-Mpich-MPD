@@ -19,7 +19,7 @@ Parallel::Mpich::MPD - Mpich MPD wrapper
 
 =cut
 
-our $VERSION = '0.8.0';
+our $VERSION = '0.9.0';
 
 =head1 SYNOPSIS
     use Parallel::Mpich::MPD;
@@ -380,7 +380,7 @@ sub check{
   #1) check mpdtrace hosts
   my $res=trace(hosts => \%hosts);
   
-  my $machines=IO::All::io($machinesfile)->slurp;
+  my $machines=io($machinesfile)->slurp;
   my %hostsdown;
   if ($res){
     #compare hosts result with the input machinesfile 
@@ -508,7 +508,7 @@ sub validateMachinesfile{
     
     if ($res){
       #compare hosts result with the input machinesfile 
-      my $machines=IO::All::io($params{machinesfile})->slurp;
+      my $machines=io($params{machinesfile})->slurp;
       print "DEBUG:validateMachinesfile(1) : machines=$machines\n\n" if ($Parallel::Mpich::MPD::Common::DEBUG == 1);
       
       my $fhosts = new File::Temp(UNLINK=>0, TEMPLATE => File::Spec->tmpdir."/$TMP_MPD_PREFIX-machines-XXXX");

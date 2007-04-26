@@ -233,7 +233,7 @@ sub env_Hostsfile{
 
 sub nbHostInMachinefile{
   my $file=shift or die "must provide a file to ".__PACKAGE__.":nbHostInMachinefile()";
-  my $hosts = IO::All::io($file)->slurp;
+  my $hosts = io($file)->slurp;
   $hosts=~s/#.*$//gm;
   my @tmp=split(/\s*\n\s*/, $hosts);
   my $count=@tmp;
@@ -243,7 +243,7 @@ sub nbHostInMachinefile{
 
 sub stripMachinefile{
   my $file=shift or die "must provide a file to ".__PACKAGE__.":stripMachinefile()";
-  my $hosts = IO::All::io($file)->slurp;
+  my $hosts = io($file)->slurp;
   $hosts=~s/#.*$//gm;
   my @tmp=split(/\s*\n\s*/, $hosts);
   my %host;
@@ -311,7 +311,7 @@ sub checkHosts{
 
   if (defined $hostsfile && -e $hostsfile ){
     print "DEBUG: checkHosts -> $hostsfile\n" if ($Parallel::Mpich::MPD::Common::DEBUG == 1);
-    $hosts=IO::All::io($hostsfile)->slurp;
+    $hosts=io($hostsfile)->slurp;
     my $res;
     foreach (split/\n/, $hosts){
       next unless /\S/;
@@ -384,10 +384,10 @@ sub __exec{
     my $exitval=$?/256;
     print STDERR __PACKAGE__."(".__LINE__.")exitval=[$exitval][$?]\n" if ($DEBUG==1);
     if (defined($params{stdout})){
-      ${$params{stdout}}=IO::All::io($fout->filename)->slurp;
+      ${$params{stdout}}=io($fout->filename)->slurp;
     }
     if (defined($params{stderr})){
-      ${$params{stderr}}=IO::All::io($ferr->filename)->slurp ;
+      ${$params{stderr}}=io($ferr->filename)->slurp ;
     }
     $ret=$exitval;
   }
