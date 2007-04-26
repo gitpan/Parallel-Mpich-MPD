@@ -1,7 +1,6 @@
 #!/usr/bin/env  perl
 use Data::Dumper;
 
-use Test::More tests => 8;
 use Test::More tests => ($ENV{MPICH_MPD_TEST})?8:2;
 use File::Basename;
 

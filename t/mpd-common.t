@@ -30,8 +30,8 @@ sub testExec{
 
 my $stderr="";
 ok(Parallel::Mpich::MPD::Common::__exec(cmd => "which bash")==0, "check good __exec");
-ok(Parallel::Mpich::MPD::Common::__exec(cmd => "which basht")==1, "check wrong __exec");
-ok(Parallel::Mpich::MPD::Common::__exec(cmd => "ls rekjf", stderr =>\$stderr)==2, "check wrong __exec");
+ok(Parallel::Mpich::MPD::Common::__exec(cmd => "which basht")!=0, "check wrong __exec");
+ok(Parallel::Mpich::MPD::Common::__exec(cmd => "ls rekjf", stderr =>\$stderr)!=0, "check wrong __exec");
 
 #
 ok(Parallel::Mpich::MPD::Common::__exec(cmd => "ls rekjf 2>/dev/null", spawn=>1)==0, "check wrong __exec with spawn");
