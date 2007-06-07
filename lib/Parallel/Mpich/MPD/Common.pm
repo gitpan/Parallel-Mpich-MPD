@@ -156,7 +156,7 @@ sub env_Init{
   unless (defined $prms{root}){
     my $id=`id -u`;
     chop $id;
-    die "ERROR: You must NOT run MPD as super user (root:$id)." unless ($id|$TEST);
+    die "ERROR: You must NOT run MPD as super user (root:$id)." if (!$TEST && $id==0 && defined $id);
   }
   return if $_isEnvInited;
   

@@ -19,7 +19,7 @@ Parallel::Mpich::MPD - Mpich MPD wrapper
 
 =cut
 
-our $VERSION = '0.9.2';
+our $VERSION = '0.9.3';
 
 =head1 SYNOPSIS
     use Parallel::Mpich::MPD;
@@ -589,6 +589,7 @@ sub createJob{
     my $n=Parallel::Mpich::MPD::Common::nbHostInMachinefile($machinesfile);
     $mpiexecArgs.=" -n $n";
   }
+  $mpiexecArgs.=" -env LD_ASSUME_KERNEL ".$ENV{LD_ASSUME_KERNEL} if ($ENV{LD_ASSUME_KERNEL});
 
   if (! defined($params{cmd})){
     carp "ERROR: key cmd not available";
